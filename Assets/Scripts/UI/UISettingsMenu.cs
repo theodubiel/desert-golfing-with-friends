@@ -41,6 +41,7 @@ public class UISettingsMenu : MonoBehaviour
         masterVolumeSlider.value = data.masterVolume;
         swingSensitivitySlider.value = data.swingSensitivity;
         startLevelInput.text = data.startingLevel.ToString();
+        fullScreenToggle.isOn = data.fullScreen;
         masterVolumeSlider.onValueChanged.AddListener(delegate {OnSave();});
         swingSensitivitySlider.onValueChanged.AddListener(delegate {OnSave();});
         startLevelInput.onValueChanged.AddListener(delegate {OnSave();});
