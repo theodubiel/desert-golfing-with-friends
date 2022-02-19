@@ -14,10 +14,14 @@ public class UIGameMenu : MonoBehaviour
     private GameObject forceChangeLevelButton;
 
     [SerializeField]
-    private GameObject changeLevelButton;
+    private TMP_Text holeLabel;
 
     [SerializeField]
-    private TMP_Text holeLabel;
+    private float levelChangeDelay = 3.0f;
+    
+    private float lastTimePlayerNotFinished = 0f;
+
+    private bool inTransition = false;
 
     void OnEnable() {
         Terrain.TerrainUpdated += UpdateHoleNumber;
@@ -31,7 +35,6 @@ public class UIGameMenu : MonoBehaviour
 
     void Start() {
         escapeMenu.SetActive(false);
-        changeLevelButton.SetActive(false);
         forceChangeLevelButton.SetActive(NetworkManager.Singleton.IsHost);
     }
 
@@ -40,17 +43,24 @@ public class UIGameMenu : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape)) {
             ToggleEscapeMenu();
         }
+        UpdateChangeLevelButton();
     }
 
     void UpdateHoleNumber() {
         holeLabel.text = string.Format("Hole {0}", Terrain.singleton.levelSeed.Value.ToString());
+        inTransition = false;
     }
 
     void UpdateChangeLevelButton() {
         if (NetworkManager.Singleton.IsHost) {
             var playerDatas = FindObjectsOfType<PlayerData>();
-            var canChangeLevel = playerDatas.All(playerData => playerData.data.Value.completeCurrentHole);
-            changeLevelButton.SetActive(canChangeLevel);
+            var allPlayersFinished = playerDatas.All(playerData => playerData.data.Value.completeCurrentHole);
+            if (!allPlayersFinished) {
+                lastTimePlayerNotFinished = Time.time;
+            }
+            if (Time.time - lastTimePlayerNotFinished >= levelChangeDelay && !inTransition) {
+                ChangeLevel();
+            }
         }
     }
 
@@ -74,6 +84,7 @@ public class UIGameMenu : MonoBehaviour
     }
 
     public void ChangeLevel() {
+        inTransition = true;
         Terrain.singleton.ChangeLevelServerRpc();
     }
 }

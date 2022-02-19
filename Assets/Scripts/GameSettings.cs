@@ -52,8 +52,10 @@ public class GameSettings
     }
 
     public static void SetFullScreen(bool isFullScreen) {
-        var mode = isFullScreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
-        Screen.SetResolution(Display.main.systemWidth, Display.main.systemHeight, mode);
+        if (Screen.fullScreen != isFullScreen) {
+            var mode = isFullScreen ? FullScreenMode.FullScreenWindow : FullScreenMode.Windowed;
+            Screen.SetResolution(Display.main.systemWidth, Display.main.systemHeight, mode);
+        }
     }
 
     public static void ApplySavedSettings() {

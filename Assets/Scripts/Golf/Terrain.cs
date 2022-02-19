@@ -42,6 +42,8 @@ public class Terrain : NetworkBehaviour
     private PolygonCollider2D polygonCollider;
     private MeshFilter meshFilter;
 
+    private bool initialTransition = true;
+
     void Awake() {
         singleton = this;
     }
@@ -157,7 +159,11 @@ public class Terrain : NetworkBehaviour
     }
 
     private void OnLevelSeedChange(int oldSeed, int newSeed) {
-        GenerateTerrain(newSeed);
+        GameCamera cameraScript = Camera.main.GetComponent<GameCamera>();
+        StartCoroutine(
+            cameraScript.TransitionCamera(() => GenerateTerrain(newSeed), initialTransition)
+        );
+        initialTransition = false;
     }
 
     [ServerRpc(RequireOwnership = true)]
